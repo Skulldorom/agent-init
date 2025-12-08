@@ -9,38 +9,58 @@ echo "Server Setup Script"
 echo "======================================"
 
 # ====================================
-# CONFIGURATION - EDIT THESE
+# LOAD ENVIRONMENT VARIABLES 
 # ====================================
-PUBLIC_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCqdgq9pd9cBQzihSwgk5rZZuDhSUnTY9XUp6eLS80egtd5la2nOEnk+gpkfFasIJn0DIOXdpIV3r5V2555YRTZcEBdJrtIcv6b+vqlZumhSuvAWVHqNvtCYbr+zQku00E8dRHj+k8KpEdBm/oNh2+fMWKYd/SR5xV/Mpz/7buCKH0yDC6n+nSjPwKWpoLLpK6UdAgACIZGbHB0D+pC1DlWSujSX/480TfGZSA6ObaOGGyKIYCS/ovfhWnk4U9kF5L/5SqWlH1OY6tCklgJy+WQpq5th7jZkKCpsQjCY9KSoh0+Lm7tULlkVyZrlOTeB/rdWGVedeqUKLEQJFd3UB6wGRXs7z8ag8I7hLOmDyg9cXKIj3Wf2PUFdB36uzCNv7cusftsf451cJxrslz462JZtt8id9bC+NQ3Qfbp1CLXqovdJITyMO2F6/UaF0PhyHnIhwmY2BoWtAhHtzWVDf4dQH1XK0emTTKNcdAZYvX1WTH1sheCR+tUBZci7Dp0DoU= mijac@DESKTOP-CCGG6EQ"
-
-# URL to your docker-compose.yml file
-DOCKER_COMPOSE_URL="https://github.com/Skulldorom/agent-init/blob/main/docker-compose.yml"
-
 PROJECT_DIR="$HOME/docker-app"
+ENV_FILE="$PROJECT_DIR/.env"
 
-# ====================================
-# 1. Install OpenSSH
-# ====================================
-echo ""
-echo "[1/4] Installing OpenSSH..."
-
-if command -v apt-get &> /dev/null; then
-    # Debian/Ubuntu
-    sudo apt-get update
-    sudo apt-get install -y openssh-server
-    sudo systemctl enable ssh
-    sudo systemctl start ssh
-elif command -v yum &> /dev/null; then
-    # RHEL/CentOS
-    sudo yum install -y openssh-server
-    sudo systemctl enable sshd
-    sudo systemctl start sshd
-else
-    echo "Unsupported package manager. Please install OpenSSH manually."
+if [ ! -f "$ENV_FILE" ]; then
+    echo ""
+    echo "✗ ERROR: .env file not found at $ENV_FILE"
+    echo ""
+    echo "Please create your .env file first with all required variables:"
+    echo "  mkdir -p $PROJECT_DIR"
+    echo "  nano $ENV_FILE"
+    echo ""
+    echo "Required variables:"
+    echo "  PUBLIC_KEY=ssh-rsa AAAA... user@host"
+    echo "  DOCKER_COMPOSE_URL=https://raw.githubusercontent.com/..."
+    echo "  GITHUB_PAT=ghp_your_token_here"
+    echo "  GITHUB_USERNAME=your_username"
+    echo ""
+    echo "Add any other environment variables your app needs."
+    echo ""
     exit 1
 fi
 
-echo "✓ OpenSSH installed and started"
+echo "Loading environment variables from $ENV_FILE..."
+
+# Load environment variables from .env
+set -a  # automatically export all variables
+source "$ENV_FILE"
+set +a
+
+echo "✓ Environment variables loaded"
+
+# Verify required variables
+if [ -z "$PUBLIC_KEY" ]; then
+    echo "✗ ERROR: PUBLIC_KEY must be set in .env file"
+    exit 1
+fi
+
+if [ -z "$DOCKER_COMPOSE_URL" ]; then
+    echo "✗ ERROR: DOCKER_COMPOSE_URL must be set in .env file"
+    exit 1
+fi
+
+if [ -z "$GITHUB_PAT" ] || [ -z "$GITHUB_USERNAME" ]; then
+    echo "✗ ERROR: GITHUB_PAT and GITHUB_USERNAME must be set in .env file"
+    exit 1
+fi
+
+# Set proper permissions on .env
+chmod 600 "$ENV_FILE"
+
 
 # ====================================
 # 2. Add Public Key
@@ -95,13 +115,23 @@ fi
 echo "✓ Docker Compose ready ($(docker compose version))"
 
 # ====================================
-# 4. Setup Docker Compose
+# 4. Login to GitHub Container Registry
 # ====================================
 echo ""
-echo "[4/4] Setting up Docker Compose..."
+echo "[4/4] Logging into GitHub Container Registry..."
 
-# Create project directory
-mkdir -p "$PROJECT_DIR"
+echo "$GITHUB_PAT" | docker login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+echo "✓ Logged into ghcr.io as $GITHUB_USERNAME"
+
+# Also login to docker.pkg.github.com (legacy GitHub Packages)
+echo "$GITHUB_PAT" | docker login docker.pkg.github.com -u "$GITHUB_USERNAME" --password-stdin
+echo "✓ Logged into docker.pkg.github.com"
+
+# ====================================
+# 5. Setup Docker Compose
+# ====================================
+echo ""
+echo "[5/5] Setting up Docker Compose..."
 
 # Download docker-compose.yml
 echo "Downloading docker-compose.yml..."
@@ -111,39 +141,6 @@ else
     echo "✗ Error: Could not download docker-compose.yml from $DOCKER_COMPOSE_URL"
     exit 1
 fi
-
-# Create .env file interactively
-echo ""
-echo "======================================"
-echo "Environment Variables Setup"
-echo "======================================"
-echo "Please enter your environment variables."
-echo "Press Ctrl+D when finished or Ctrl+C to skip."
-echo ""
-
-ENV_FILE="$PROJECT_DIR/.env"
-
-# Check if .env already exists
-if [ -f "$ENV_FILE" ]; then
-    echo "⚠ .env file already exists at $ENV_FILE"
-    read -p "Do you want to overwrite it? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "Keeping existing .env file"
-    else
-        rm "$ENV_FILE"
-        echo "Enter variables in KEY=VALUE format (one per line):"
-        cat > "$ENV_FILE"
-        echo "✓ .env file created"
-    fi
-else
-    echo "Enter variables in KEY=VALUE format (one per line):"
-    cat > "$ENV_FILE"
-    echo "✓ .env file created"
-fi
-
-# Set proper permissions on .env
-chmod 600 "$ENV_FILE"
 
 # Start services
 cd "$PROJECT_DIR"
@@ -159,14 +156,14 @@ echo "======================================"
 echo "✓ Setup Complete!"
 echo "======================================"
 echo ""
-echo "Next steps:"
-echo "1. If this is your first time, log out and back in for Docker group changes to take effect"
-echo "2. Your Docker services are running in: $PROJECT_DIR"
-echo "3. View your .env file: cat $PROJECT_DIR/.env"
-echo "4. Edit .env anytime: nano $PROJECT_DIR/.env"
-echo "5. After editing .env, restart services: cd $PROJECT_DIR && docker compose restart"
-echo "6. Manage services with:"
-echo "   - docker compose ps    (view status)"
-echo "   - docker compose logs  (view logs)"
-echo "   - docker compose down  (stop services)"
+echo "Your Docker services are running in: $PROJECT_DIR"
+echo ""
+echo "Manage services with:"
+echo "   - docker compose ps      (view status)"
+echo "   - docker compose logs    (view logs)"
+echo "   - docker compose down    (stop services)"
+echo "   - docker compose pull    (update images)"
+echo "   - docker compose restart (restart services)"
+echo ""
+echo "NOTE: If Docker was just installed, log out and back in for group changes to take effect"
 echo ""
