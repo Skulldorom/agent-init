@@ -1,0 +1,120 @@
+services:
+  vite:
+    image: ghcr.io/mijackk/agent-chat:latest
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-5173}:80"
+    volumes:
+      - vite-storage:/usr/share/nginx/html/config
+    networks:
+      - app-network
+    depends_on:
+      - app
+    command: >
+      sh -c 'echo "{ \"api_url\":\"${API_URL:-http://localhost:5000}\"}" 
+      > /usr/share/nginx/html/config/config.json 
+      && nginx -g "daemon off;"'
+  app:
+    image: ghcr.io/mijackk/agent-backend:latest
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-5000}:5000"
+    volumes:
+      - image-store:/app/uploads
+    depends_on:
+      - db
+      - redis
+      - qdrant
+    # Optional: use env_file instead
+    networks:
+      - app-network
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/mydb
+      - RATE_LIMIT_STORAGE=redis://redis:6379/0
+      - REDIS_CACHE_URL=redis://redis:6379/1
+      - MODE=production
+      - ALLOWED_ORIGINS=${FRONTEND_DOMAIN:-http://localhost:5173}
+      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN:-http://localhost:5173}
+      # upload
+      - UPLOAD_FOLDER=uploads
+      #qdrant
+      - collection=production
+      - QDRANT_URL=http://qdrant:6333
+      # mail
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_TSL=true
+      - MAIL_SSL=false
+
+    env_file:
+      - .env
+
+  # can delete the below if already installed
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    ports:
+      - "${DB_PORT:-5433}:5432"
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - app-network
+    volumes:
+      - redis_data:/data
+    # Optional: Add Redis configuration
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_REST_PORT:-6333}:6333" # REST API
+      - "${QDRANT_GRPC_PORT:-6334}:6334" # gRPC API (optional)
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - app-network
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    # Optional: Add custom Qdrant config
+    # volumes:
+    #   - ./qdrant_config.yaml:/qdrant/config/production.yaml
+
+  nginx:
+    image: "jc21/nginx-proxy-manager:latest"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  image-store:
+  vite-storage:
+  data:
+  letsencrypt:
+
+networks:
+  app-network:
