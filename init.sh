@@ -96,7 +96,7 @@ if command -v docker &> /dev/null; then
 else
     # Install Docker using official script
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+    sh get-docker.sh
     rm get-docker.sh
     
     # Add current user to docker group
@@ -108,8 +108,8 @@ fi
 # Install Docker Compose plugin
 if ! docker compose version &> /dev/null; then
     echo "Installing Docker Compose..."
-    sudo apt-get update
-    sudo apt-get install -y docker-compose-plugin
+    apt-get update
+    apt-get install -y docker-compose-plugin
 fi
 
 echo "✓ Docker Compose ready ($(docker compose version))"
