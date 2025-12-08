@@ -6,7 +6,13 @@ set -e
 # ====================================
 # SECURITY TOKEN CHECK
 # ====================================
+EXPECTED_TOKEN="your-secret-token-here-change-this"
 
+if [ "$1" != "$EXPECTED_TOKEN" ]; then
+    echo "ERROR: Invalid or missing token"
+    echo "Usage: curl -fsSL https://your-domain.com/setup.sh | bash -s YOUR_TOKEN"
+    exit 1
+fi
 
 echo "======================================"
 echo "Server Setup Script"
@@ -17,19 +23,8 @@ echo "======================================"
 # ====================================
 PUBLIC_KEY="ssh-rsa YOUR_PUBLIC_KEY_HERE user@hostname"
 
-DOCKER_COMPOSE_CONTENT='version: "3.8"
-services:
-  app:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    environment:
-      - ENV_VAR_1=${ENV_VAR_1}
-      - ENV_VAR_2=${ENV_VAR_2}
-    restart: unless-stopped'
-
-ENV_FILE_CONTENT='ENV_VAR_1=value1
-ENV_VAR_2=value2'
+# URL to your docker-compose.yml file
+DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/yourusername/repo/main/docker-compose.yml"
 
 PROJECT_DIR="$HOME/docker-app"
 
@@ -118,13 +113,47 @@ echo "[4/4] Setting up Docker Compose..."
 # Create project directory
 mkdir -p "$PROJECT_DIR"
 
-# Write docker-compose.yml
-echo "$DOCKER_COMPOSE_CONTENT" > "$PROJECT_DIR/docker-compose.yml"
-echo "✓ docker-compose.yml created"
+# Download docker-compose.yml
+echo "Downloading docker-compose.yml..."
+if curl -fsSL "$DOCKER_COMPOSE_URL" -o "$PROJECT_DIR/docker-compose.yml"; then
+    echo "✓ docker-compose.yml downloaded"
+else
+    echo "✗ Error: Could not download docker-compose.yml from $DOCKER_COMPOSE_URL"
+    exit 1
+fi
 
-# Write .env file
-echo "$ENV_FILE_CONTENT" > "$PROJECT_DIR/.env"
-echo "✓ .env file created"
+# Create .env file interactively
+echo ""
+echo "======================================"
+echo "Environment Variables Setup"
+echo "======================================"
+echo "Please enter your environment variables."
+echo "Press Ctrl+D when finished or Ctrl+C to skip."
+echo ""
+
+ENV_FILE="$PROJECT_DIR/.env"
+
+# Check if .env already exists
+if [ -f "$ENV_FILE" ]; then
+    echo "⚠ .env file already exists at $ENV_FILE"
+    read -p "Do you want to overwrite it? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Keeping existing .env file"
+    else
+        rm "$ENV_FILE"
+        echo "Enter variables in KEY=VALUE format (one per line):"
+        cat > "$ENV_FILE"
+        echo "✓ .env file created"
+    fi
+else
+    echo "Enter variables in KEY=VALUE format (one per line):"
+    cat > "$ENV_FILE"
+    echo "✓ .env file created"
+fi
+
+# Set proper permissions on .env
+chmod 600 "$ENV_FILE"
 
 # Start services
 cd "$PROJECT_DIR"
@@ -143,7 +172,10 @@ echo ""
 echo "Next steps:"
 echo "1. If this is your first time, log out and back in for Docker group changes to take effect"
 echo "2. Your Docker services are running in: $PROJECT_DIR"
-echo "3. Manage services with:"
+echo "3. View your .env file: cat $PROJECT_DIR/.env"
+echo "4. Edit .env anytime: nano $PROJECT_DIR/.env"
+echo "5. After editing .env, restart services: cd $PROJECT_DIR && docker compose restart"
+echo "6. Manage services with:"
 echo "   - docker compose ps    (view status)"
 echo "   - docker compose logs  (view logs)"
 echo "   - docker compose down  (stop services)"
