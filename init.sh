@@ -61,6 +61,30 @@ fi
 # Set proper permissions on .env
 chmod 600 "$ENV_FILE"
 
+# ====================================
+# 1. Install OpenSSH
+# ====================================
+echo ""
+echo "[1/4] Installing OpenSSH..."
+
+if command -v apt-get &> /dev/null; then
+    # Debian/Ubuntu
+    apt-get update
+    apt-get install -y openssh-server
+    systemctl enable ssh
+    systemctl start ssh
+elif command -v yum &> /dev/null; then
+    # RHEL/CentOS
+    yum install -y openssh-server
+    systemctl enable sshd
+    systemctl start sshd
+else
+    echo "Unsupported package manager. Please install OpenSSH manually."
+    exit 1
+fi
+
+echo "✓ OpenSSH installed and started"
+
 
 # ====================================
 # 2. Add Public Key
