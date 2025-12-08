@@ -100,7 +100,7 @@ else
     rm get-docker.sh
     
     # Add current user to docker group
-    sudo usermod -aG docker $USER
+    usermod -aG docker $USER
     
     echo "✓ Docker installed"
 fi
