@@ -11,15 +11,14 @@ echo "======================================"
 # ====================================
 # LOAD ENVIRONMENT VARIABLES 
 # ====================================
-PROJECT_DIR="/docker-app"
-ENV_FILE="$PROJECT_DIR/.env"
+
+ENV_FILE=".env"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo ""
     echo "✗ ERROR: .env file not found at $ENV_FILE"
     echo ""
     echo "Please create your .env file first with all required variables:"
-    echo "  mkdir -p $PROJECT_DIR"
     echo "  nano $ENV_FILE"
     echo ""
     echo "Required variables:"
