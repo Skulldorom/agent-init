@@ -11,7 +11,7 @@ echo "======================================"
 # ====================================
 # LOAD ENVIRONMENT VARIABLES 
 # ====================================
-PROJECT_DIR="$HOME/docker-app"
+PROJECT_DIR="/docker-app"
 ENV_FILE="$PROJECT_DIR/.env"
 
 if [ ! -f "$ENV_FILE" ]; then
