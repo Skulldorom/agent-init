@@ -3,16 +3,6 @@
 # Exit on any error
 set -e
 
-# ====================================
-# SECURITY TOKEN CHECK
-# ====================================
-EXPECTED_TOKEN="your-secret-token-here-change-this"
-
-if [ "$1" != "$EXPECTED_TOKEN" ]; then
-    echo "ERROR: Invalid or missing token"
-    echo "Usage: curl -fsSL https://your-domain.com/setup.sh | bash -s YOUR_TOKEN"
-    exit 1
-fi
 
 echo "======================================"
 echo "Server Setup Script"
@@ -21,10 +11,10 @@ echo "======================================"
 # ====================================
 # CONFIGURATION - EDIT THESE
 # ====================================
-PUBLIC_KEY="ssh-rsa YOUR_PUBLIC_KEY_HERE user@hostname"
+PUBLIC_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCqdgq9pd9cBQzihSwgk5rZZuDhSUnTY9XUp6eLS80egtd5la2nOEnk+gpkfFasIJn0DIOXdpIV3r5V2555YRTZcEBdJrtIcv6b+vqlZumhSuvAWVHqNvtCYbr+zQku00E8dRHj+k8KpEdBm/oNh2+fMWKYd/SR5xV/Mpz/7buCKH0yDC6n+nSjPwKWpoLLpK6UdAgACIZGbHB0D+pC1DlWSujSX/480TfGZSA6ObaOGGyKIYCS/ovfhWnk4U9kF5L/5SqWlH1OY6tCklgJy+WQpq5th7jZkKCpsQjCY9KSoh0+Lm7tULlkVyZrlOTeB/rdWGVedeqUKLEQJFd3UB6wGRXs7z8ag8I7hLOmDyg9cXKIj3Wf2PUFdB36uzCNv7cusftsf451cJxrslz462JZtt8id9bC+NQ3Qfbp1CLXqovdJITyMO2F6/UaF0PhyHnIhwmY2BoWtAhHtzWVDf4dQH1XK0emTTKNcdAZYvX1WTH1sheCR+tUBZci7Dp0DoU= mijac@DESKTOP-CCGG6EQ"
 
 # URL to your docker-compose.yml file
-DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/yourusername/repo/main/docker-compose.yml"
+DOCKER_COMPOSE_URL="https://github.com/Skulldorom/agent-init/blob/main/docker-compose.yml"
 
 PROJECT_DIR="$HOME/docker-app"
 
