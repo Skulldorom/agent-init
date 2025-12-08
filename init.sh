@@ -6,13 +6,7 @@ set -e
 # ====================================
 # SECURITY TOKEN CHECK
 # ====================================
-EXPECTED_TOKEN="your-secret-token-here-change-this"
 
-if [ "$1" != "$EXPECTED_TOKEN" ]; then
-    echo "ERROR: Invalid or missing token"
-    echo "Usage: curl -fsSL https://your-domain.com/setup.sh | bash -s YOUR_TOKEN"
-    exit 1
-fi
 
 echo "======================================"
 echo "Server Setup Script"
