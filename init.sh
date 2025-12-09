@@ -33,8 +33,8 @@ if [ ! -f "$ENV_FILE" ]; then
 fi
 
 #create project directory
-sudo mkdir -p "$PROJECT_DIR"
-sudo chmod 700 "$PROJECT_DIR"
+mkdir -p "$PROJECT_DIR"
+chmod 700 "$PROJECT_DIR"
 
 echo "Loading environment variables from $ENV_FILE..."
 
