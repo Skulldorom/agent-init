@@ -14,6 +14,7 @@ echo "======================================"
 
 ENV_FILE=".env"
 PROJECT_DIR="/opt/agent-app"
+DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/docker-compose.yml"
 echo "checking env file...."
 
 if [ ! -f "$ENV_FILE" ]; then
