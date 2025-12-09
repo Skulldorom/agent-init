@@ -13,7 +13,7 @@ echo "======================================"
 # ====================================
 
 ENV_FILE=".env"
-PROJECT_DIR="/opt/agent-app"
+PROJECT_DIR="/opt/techtoday-agent"
 DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/docker-compose.yml"
 echo "checking env file...."
 
@@ -127,6 +127,7 @@ echo "✓ Docker services started"
 echo "moving env to project directory.."
 #move env file to project directory
 mv "$ENV_FILE" "$PROJECT_DIR/"
+cd "$PROJECT_DIR"
 
 # intialize database
 echo "Initializing db..."
