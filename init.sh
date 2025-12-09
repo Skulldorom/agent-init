@@ -37,6 +37,11 @@ sudo chmod 700 "$PROJECT_DIR"
 
 echo "Loading environment variables from $ENV_FILE..."
 
+#add automated secret_key and encryption key
+echo "SECRET_KEY=$(openssl rand -hex 32)" >> "$ENV_FILE"
+echo "ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$ENV_FILE"
+echo "✓ Keys added!"
+
 # Load environment variables from .env
 set -a  # automatically export all variables
 source "$ENV_FILE"
