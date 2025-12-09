@@ -119,6 +119,8 @@ cd "$PROJECT_DIR"
 docker compose up -d
 
 echo "✓ Docker services started"
+
+# intialize database
 echo "Initializing db..."
 if curl -X POST "http://localhost:5000/init"; then
     echo "Backend initialized"
