@@ -119,7 +119,6 @@ else
 fi
 
 # Start services
-cd "$PROJECT_DIR"
 docker compose up -d
 
 echo "✓ Docker services started"
