@@ -117,16 +117,16 @@ else
     echo "✗ Error: Could not download docker-compose.yml from $DOCKER_COMPOSE_URL"
     exit 1
 fi
+echo "moving env to project directory.."
+#move env file to project directory
+mv "$ENV_FILE" "$PROJECT_DIR/"
+cd "$PROJECT_DIR"
 
 # Start services
 docker compose up -d
 
 echo "✓ Docker services started"
 
-echo "moving env to project directory.."
-#move env file to project directory
-mv "$ENV_FILE" "$PROJECT_DIR/"
-cd "$PROJECT_DIR"
 
 # intialize database
 echo "Initializing db..."
