@@ -13,6 +13,7 @@ echo "======================================"
 # ====================================
 
 ENV_FILE=".env"
+$PROJECT_DIR="/opt/agent-app"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo ""
@@ -22,8 +23,6 @@ if [ ! -f "$ENV_FILE" ]; then
     echo "  nano $ENV_FILE"
     echo ""
     echo "Required variables:"
-    echo "  PUBLIC_KEY=ssh-rsa AAAA... user@host"
-    echo "  DOCKER_COMPOSE_URL=https://raw.githubusercontent.com/..."
     echo "  GITHUB_PAT=ghp_your_token_here"
     echo "  GITHUB_USERNAME=your_username"
     echo ""
@@ -31,6 +30,10 @@ if [ ! -f "$ENV_FILE" ]; then
     echo ""
     exit 1
 fi
+
+#create project directory
+sudo mkdir -p "$PROJECT_DIR"
+sudo chmod 700 "$PROJECT_DIR"
 
 echo "Loading environment variables from $ENV_FILE..."
 
@@ -41,16 +44,6 @@ set +a
 
 echo "✓ Environment variables loaded"
 
-# Verify required variables
-if [ -z "$PUBLIC_KEY" ]; then
-    echo "✗ ERROR: PUBLIC_KEY must be set in .env file"
-    exit 1
-fi
-
-if [ -z "$DOCKER_COMPOSE_URL" ]; then
-    echo "✗ ERROR: DOCKER_COMPOSE_URL must be set in .env file"
-    exit 1
-fi
 
 if [ -z "$GITHUB_PAT" ] || [ -z "$GITHUB_USERNAME" ]; then
     echo "✗ ERROR: GITHUB_PAT and GITHUB_USERNAME must be set in .env file"
@@ -60,59 +53,15 @@ fi
 # Set proper permissions on .env
 chmod 600 "$ENV_FILE"
 
-# ====================================
-# 1. Install OpenSSH
-# ====================================
-echo ""
-echo "[1/4] Installing OpenSSH..."
-
-if command -v apt-get &> /dev/null; then
-    # Debian/Ubuntu
-    apt-get update
-    apt-get install -y openssh-server
-    systemctl enable ssh
-    systemctl start ssh
-elif command -v yum &> /dev/null; then
-    # RHEL/CentOS
-    yum install -y openssh-server
-    systemctl enable sshd
-    systemctl start sshd
-else
-    echo "Unsupported package manager. Please install OpenSSH manually."
-    exit 1
-fi
-
-echo "✓ OpenSSH installed and started"
+#move env file to project directory
+mv "$ENV_FILE" "$PROJECT_DIR"/"
 
 
 # ====================================
-# 2. Add Public Key
+# 1. Install Docker
 # ====================================
 echo ""
-echo "[2/4] Adding public key..."
-
-mkdir -p ~/.ssh
-chmod 700 ~/.ssh
-
-if [ ! -f ~/.ssh/authorized_keys ]; then
-    touch ~/.ssh/authorized_keys
-fi
-
-chmod 600 ~/.ssh/authorized_keys
-
-# Add key if it doesn't already exist
-if ! grep -q "$PUBLIC_KEY" ~/.ssh/authorized_keys 2>/dev/null; then
-    echo "$PUBLIC_KEY" >> ~/.ssh/authorized_keys
-    echo "✓ Public key added"
-else
-    echo "✓ Public key already exists"
-fi
-
-# ====================================
-# 3. Install Docker
-# ====================================
-echo ""
-echo "[3/4] Installing Docker..."
+echo "[1/3] Installing Docker..."
 
 if command -v docker &> /dev/null; then
     echo "✓ Docker already installed ($(docker --version))"
@@ -138,10 +87,10 @@ fi
 echo "✓ Docker Compose ready ($(docker compose version))"
 
 # ====================================
-# 4. Login to GitHub Container Registry
+# 2. Login to GitHub Container Registry
 # ====================================
 echo ""
-echo "[4/4] Logging into GitHub Container Registry..."
+echo "[2/3] Logging into GitHub Container Registry..."
 
 echo "$GITHUB_PAT" | docker login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
 echo "✓ Logged into ghcr.io as $GITHUB_USERNAME"
@@ -154,7 +103,7 @@ echo "✓ Logged into docker.pkg.github.com"
 # 5. Setup Docker Compose
 # ====================================
 echo ""
-echo "[5/5] Setting up Docker Compose..."
+echo "[3/3] Setting up Docker Compose..."
 
 # Download docker-compose.yml
 echo "Downloading docker-compose.yml..."
