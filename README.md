@@ -1,9 +1,12 @@
 # agent-init
-Init for Agent docekr images
 
-`bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/init.sh)"`
 
-## Environment
+## Getting Started
+
+create an `.env` file with the following details in your current directory
+
+This will be moved into the `/opt` folder in a folder called `techtoday-agent`
+
 ```
 FRONTEND_DOMAIN=http://localhost:5173
 API_URL=http://localhost:5000
@@ -35,3 +38,10 @@ CREDIT_CONTROL=False
 GITHUB_USERNAME=
 GITHUB_PAT=
 ```
+
+Init for Agent docekr images
+
+`bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/init.sh)"`
+
+## Environment
+
