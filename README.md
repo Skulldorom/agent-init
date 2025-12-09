@@ -3,7 +3,7 @@ Init for Agent docekr images
 
 `bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skulldorom/agent-init/blob/main/init.sh)"`
 
-## environment
+## Environment
 ```
 FRONTEND_DOMAIN=http://localhost:5173
 API_URL=http://localhost:5000
