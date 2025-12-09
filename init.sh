@@ -60,9 +60,6 @@ fi
 # Set proper permissions on .env
 chmod 600 "$ENV_FILE"
 
-#move env file to project directory
-mv "$ENV_FILE" "$PROJECT_DIR/"
-
 
 # ====================================
 # 1. Install Docker
@@ -126,6 +123,10 @@ cd "$PROJECT_DIR"
 docker compose up -d
 
 echo "✓ Docker services started"
+
+echo "moving env to project directory.."
+#move env file to project directory
+mv "$ENV_FILE" "$PROJECT_DIR/"
 
 # intialize database
 echo "Initializing db..."
