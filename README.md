@@ -5,7 +5,7 @@
 
 create an `.env` file with the following details in your current directory
 
-This will be moved into the `/opt` folder in a folder called `techtoday-agent`
+This will be moved into the `/opt/techtoday-agent`
 
 ```
 FRONTEND_DOMAIN=http://localhost:5173
