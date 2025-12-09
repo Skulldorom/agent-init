@@ -14,6 +14,7 @@ echo "======================================"
 
 ENV_FILE=".env"
 $PROJECT_DIR="/opt/agent-app"
+echo "checking env file...."
 
 if [ ! -f "$ENV_FILE" ]; then
     echo ""
