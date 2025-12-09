@@ -60,7 +60,7 @@ fi
 chmod 600 "$ENV_FILE"
 
 #move env file to project directory
-mv "$ENV_FILE" "$PROJECT_DIR"/"
+mv "$ENV_FILE" "$PROJECT_DIR/"
 
 
 # ====================================
