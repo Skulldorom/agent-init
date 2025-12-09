@@ -4,7 +4,7 @@ Init for Agent docekr images
 `bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skulldorom/agent-init/blob/main/init.sh)"`
 
 ## environment
-
+```
 FRONTEND_DOMAIN=http://localhost:5173
 API_URL=http://localhost:5000
 #postgresql 
@@ -34,3 +34,4 @@ CREDIT_CONTROL=False
 #github
 GITHUB_USERNAME=
 GITHUB_PAT=
+```
