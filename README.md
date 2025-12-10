@@ -54,8 +54,14 @@ update
 ```
 
 This command can be run from anywhere and will:
+- **Check for updates to the update script itself** and apply them automatically
 - Stop all Docker services
 - Download the latest configuration files (docker-compose.yml, nginx.conf)
 - Pull the latest Docker images
+- **Clean up old and unused Docker images** to free up disk space
 - Restart all services
+
+The update command now includes:
+- **Self-update capability**: The update script checks for its own updates and automatically applies them before proceeding
+- **Docker image cleanup**: Removes dangling and old unused images (older than 24 hours) to prevent disk space issues
 
