@@ -8,8 +8,8 @@ echo "TechToday Agent Update Script"
 echo "======================================"
 
 PROJECT_DIR="/opt/techtoday-agent"
-DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/docker-compose.yml"
-NGINX_CONF_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/nginx.conf"
+REPO_URL="https://github.com/Skulldorom/agent-init"
+REPO_BRANCH="main"
 
 # Check if project directory exists
 if [ ! -d "$PROJECT_DIR" ]; then
@@ -27,21 +27,20 @@ echo "✓ Docker services stopped"
 echo ""
 echo "[2/4] Downloading latest configuration files..."
 
-# Download docker-compose.yml
-echo "Downloading docker-compose.yml..."
-if curl -fsSL "$DOCKER_COMPOSE_URL" -o "$PROJECT_DIR/docker-compose.yml"; then
-    echo "✓ docker-compose.yml updated"
+# Download repository files
+TEMP_DIR=$(mktemp -d)
+if curl -fsSL "${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz" | tar -xz -C "$TEMP_DIR" --strip-components=1; then
+    echo "✓ Repository files downloaded"
+    
+    # Copy necessary files to project directory
+    cp "$TEMP_DIR/docker-compose.yml" "$PROJECT_DIR/"
+    cp "$TEMP_DIR/nginx.conf" "$PROJECT_DIR/"
+    
+    # Clean up temp directory
+    rm -rf "$TEMP_DIR"
 else
-    echo "✗ Error: Could not download docker-compose.yml"
-    exit 1
-fi
-
-# Download nginx.conf
-echo "Downloading nginx.conf..."
-if curl -fsSL "$NGINX_CONF_URL" -o "$PROJECT_DIR/nginx.conf"; then
-    echo "✓ nginx.conf updated"
-else
-    echo "✗ Error: Could not download nginx.conf"
+    echo "✗ Error: Could not download repository from $REPO_URL"
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
