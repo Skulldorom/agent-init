@@ -15,6 +15,8 @@ echo "======================================"
 ENV_FILE=".env"
 PROJECT_DIR="/opt/techtoday-agent"
 DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/docker-compose.yml"
+NGINX_CONF_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/nginx.conf"
+UPDATE_SCRIPT_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/update.sh"
 echo "checking env file...."
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -117,6 +119,25 @@ else
     echo "✗ Error: Could not download docker-compose.yml from $DOCKER_COMPOSE_URL"
     exit 1
 fi
+
+# Download nginx.conf
+echo "Downloading nginx.conf..."
+if curl -fsSL "$NGINX_CONF_URL" -o "$PROJECT_DIR/nginx.conf"; then
+    echo "✓ nginx.conf downloaded"
+else
+    echo "✗ Error: Could not download nginx.conf from $NGINX_CONF_URL"
+    exit 1
+fi
+
+# Download and install update script
+echo "Installing update script..."
+if curl -fsSL "$UPDATE_SCRIPT_URL" -o /usr/local/bin/update; then
+    chmod +x /usr/local/bin/update
+    echo "✓ update script installed (run 'update' from anywhere to update services)"
+else
+    echo "⚠ Warning: Could not download update script"
+fi
+
 echo "moving env to project directory.."
 #move env file to project directory
 mv "$ENV_FILE" "$PROJECT_DIR/"
@@ -153,6 +174,9 @@ echo "   - docker compose logs    (view logs)"
 echo "   - docker compose down    (stop services)"
 echo "   - docker compose pull    (update images)"
 echo "   - docker compose restart (restart services)"
+echo ""
+echo "Quick update command:"
+echo "   - update                 (stops services, downloads new files, pulls new images, and restarts)"
 echo ""
 echo "NOTE: If Docker was just installed, log out and back in for group changes to take effect"
 echo ""
