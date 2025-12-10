@@ -179,9 +179,9 @@ docker compose up -d
 echo "✓ Docker services started"
 
 
-# intialize database
+# initialize database
 echo "Initializing db..."
-if curl -X POST "http://localhost:5000/init"; then
+if curl -X POST "http://localhost/api/init"; then
     echo "Backend initialized"
 else
     echo "Failed to initialize backend"
