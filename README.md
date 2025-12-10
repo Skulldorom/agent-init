@@ -45,3 +45,17 @@ Init for Agent docekr images
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/init.sh)"
 ```
 
+## Updating the Services
+
+After initial setup, you can update your services to the latest versions by simply running:
+
+```
+update
+```
+
+This command can be run from anywhere and will:
+- Stop all Docker services
+- Download the latest configuration files (docker-compose.yml, nginx.conf)
+- Pull the latest Docker images
+- Restart all services
+

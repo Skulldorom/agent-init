@@ -14,8 +14,8 @@ echo "======================================"
 
 ENV_FILE=".env"
 PROJECT_DIR="/opt/techtoday-agent"
-DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/docker-compose.yml"
-NGINX_CONF_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/nginx.conf"
+REPO_URL="https://github.com/Skulldorom/agent-init"
+REPO_BRANCH="main"
 echo "checking env file...."
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -110,23 +110,44 @@ echo "✓ Logged into docker.pkg.github.com"
 echo ""
 echo "[3/3] Setting up Docker Compose..."
 
-# Download docker-compose.yml
-echo "Downloading docker-compose.yml..."
-if curl -fsSL "$DOCKER_COMPOSE_URL" -o "$PROJECT_DIR/docker-compose.yml"; then
-    echo "✓ docker-compose.yml downloaded"
+# Download repository files
+echo "Downloading repository files..."
+TEMP_DIR=$(mktemp -d)
+if curl -fsSL "${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz" | tar -xz -C "$TEMP_DIR" --strip-components=1; then
+    echo "✓ Repository files downloaded"
+    
+    # Copy necessary files to project directory
+    if [ -f "$TEMP_DIR/docker-compose.yml" ]; then
+        cp "$TEMP_DIR/docker-compose.yml" "$PROJECT_DIR/"
+    else
+        echo "✗ Error: docker-compose.yml not found in repository"
+        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    
+    if [ -f "$TEMP_DIR/nginx.conf" ]; then
+        cp "$TEMP_DIR/nginx.conf" "$PROJECT_DIR/"
+    else
+        echo "✗ Error: nginx.conf not found in repository"
+        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    
+    # Install update script
+    if [ -f "$TEMP_DIR/update.sh" ]; then
+        cp "$TEMP_DIR/update.sh" /usr/local/bin/update
+        chmod +x /usr/local/bin/update
+        echo "✓ update script installed (run 'update' from anywhere to update services)"
+    fi
+    
+    # Clean up temp directory
+    [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
 else
-    echo "✗ Error: Could not download docker-compose.yml from $DOCKER_COMPOSE_URL"
+    echo "✗ Error: Could not download repository from $REPO_URL"
+    [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
     exit 1
 fi
 
-# Download nginx.conf
-echo "Downloading nginx.conf..."
-if curl -fsSL "$NGINX_CONF_URL" -o "$PROJECT_DIR/nginx.conf"; then
-    echo "✓ nginx.conf downloaded"
-else
-    echo "✗ Error: Could not download nginx.conf from $NGINX_CONF_URL"
-    exit 1
-fi
 echo "moving env to project directory.."
 #move env file to project directory
 mv "$ENV_FILE" "$PROJECT_DIR/"
@@ -163,6 +184,9 @@ echo "   - docker compose logs    (view logs)"
 echo "   - docker compose down    (stop services)"
 echo "   - docker compose pull    (update images)"
 echo "   - docker compose restart (restart services)"
+echo ""
+echo "Quick update command:"
+echo "   - update                 (stops services, downloads new files, pulls new images, and restarts)"
 echo ""
 echo "NOTE: If Docker was just installed, log out and back in for group changes to take effect"
 echo ""
