@@ -15,6 +15,7 @@ echo "======================================"
 ENV_FILE=".env"
 PROJECT_DIR="/opt/techtoday-agent"
 DOCKER_COMPOSE_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/docker-compose.yml"
+NGINX_CONF_URL="https://raw.githubusercontent.com/Skulldorom/agent-init/refs/heads/main/nginx.conf"
 echo "checking env file...."
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -115,6 +116,15 @@ if curl -fsSL "$DOCKER_COMPOSE_URL" -o "$PROJECT_DIR/docker-compose.yml"; then
     echo "✓ docker-compose.yml downloaded"
 else
     echo "✗ Error: Could not download docker-compose.yml from $DOCKER_COMPOSE_URL"
+    exit 1
+fi
+
+# Download nginx.conf
+echo "Downloading nginx.conf..."
+if curl -fsSL "$NGINX_CONF_URL" -o "$PROJECT_DIR/nginx.conf"; then
+    echo "✓ nginx.conf downloaded"
+else
+    echo "✗ Error: Could not download nginx.conf from $NGINX_CONF_URL"
     exit 1
 fi
 echo "moving env to project directory.."
