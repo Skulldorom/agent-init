@@ -9,7 +9,7 @@ This will be moved into the `/opt/techtoday-agent`
 
 ```
 FRONTEND_DOMAIN=http://localhost:5173
-API_URL=http://localhost/api
+API_URL=
 #postgresql 
 POSTGRES_USER=bob
 POSTGRES_PASSWORD=secret
