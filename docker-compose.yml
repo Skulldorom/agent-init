@@ -8,8 +8,6 @@ services:
       - app-network
     depends_on:
       - app
-    environment:
-      - API_URL=http://nginx/api
     command: >
       sh -c 'echo "{ \"api_url\":\"${API_URL:-http://nginx/api}" 
       > /usr/share/nginx/html/config/config.json 
