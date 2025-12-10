@@ -8,7 +8,6 @@ create an `.env` file with the following details in your current directory
 This will be moved into the `/opt/techtoday-agent`
 
 ```
-FRONTEND_DOMAIN=http://localhost
 API_URL=http://localhost
 #postgresql 
 POSTGRES_USER=bob
