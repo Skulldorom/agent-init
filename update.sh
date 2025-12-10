@@ -32,7 +32,7 @@ if curl -fsSL "${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz" | tar -xz -
             cp "$TEMP_DIR/update.sh" "$UPDATE_SCRIPT_PATH"
             chmod +x "$UPDATE_SCRIPT_PATH"
             echo "✓ Update script has been updated"
-            [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+            rm -rf "$TEMP_DIR"
             echo "  Re-running updated script..."
             echo ""
             exec "$UPDATE_SCRIPT_PATH" "$@"
@@ -45,8 +45,7 @@ else
     echo "  Continuing with current version..."
 fi
 
-# Keep temp directory for reuse in step 2
-# [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+# Reuse temp directory if it still exists from the self-update check above
 
 echo ""
 echo "[1/5] Stopping Docker services..."
@@ -57,12 +56,12 @@ echo "✓ Docker services stopped"
 echo ""
 echo "[2/5] Downloading latest configuration files..."
 
-# Reuse temp directory if available, or create new one
-if [ -z "$TEMP_DIR" ] || [ ! -d "$TEMP_DIR" ]; then
+# Reuse temp directory if it still exists from the self-update check above
+if [ ! -d "$TEMP_DIR" ] || [ -z "$TEMP_DIR" ]; then
     TEMP_DIR=$(mktemp -d)
     if ! curl -fsSL "${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz" | tar -xz -C "$TEMP_DIR" --strip-components=1; then
         echo "✗ Error: Could not download repository from $REPO_URL"
-        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        rm -rf "$TEMP_DIR"
         exit 1
     fi
 fi
@@ -74,7 +73,7 @@ if [ -d "$TEMP_DIR" ]; then
         echo "✓ docker-compose.yml updated"
     else
         echo "✗ Error: docker-compose.yml not found in repository"
-        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        rm -rf "$TEMP_DIR"
         exit 1
     fi
     
@@ -83,15 +82,15 @@ if [ -d "$TEMP_DIR" ]; then
         echo "✓ nginx.conf updated"
     else
         echo "✗ Error: nginx.conf not found in repository"
-        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        rm -rf "$TEMP_DIR"
         exit 1
     fi
     
     # Clean up temp directory
-    [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+    rm -rf "$TEMP_DIR"
 else
     echo "✗ Error: Could not download repository files"
-    [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
@@ -103,16 +102,20 @@ echo "✓ Docker images updated"
 echo ""
 echo "[4/5] Cleaning up old Docker images..."
 # Remove dangling images (untagged images)
-if docker image prune -f &> /dev/null; then
-    echo "✓ Dangling images removed"
+PRUNE_OUTPUT=$(docker image prune -f 2>&1)
+if echo "$PRUNE_OUTPUT" | grep -q "Total reclaimed space"; then
+    SPACE=$(echo "$PRUNE_OUTPUT" | grep "Total reclaimed space" | cut -d: -f2 | tr -d ' ')
+    echo "✓ Dangling images removed: $SPACE reclaimed"
+else
+    echo "✓ No dangling images to remove"
 fi
 
 # Remove unused images that are not associated with any container
 # Using -a to remove all unused images, not just dangling ones
-REMOVED_IMAGES=$(docker image prune -a -f --filter "until=24h" 2>&1 | grep "Total reclaimed space" || echo "")
-if [ -n "$REMOVED_IMAGES" ]; then
-    echo "✓ Old unused images cleaned up"
-    echo "  $REMOVED_IMAGES"
+PRUNE_ALL_OUTPUT=$(docker image prune -a -f --filter "until=24h" 2>&1)
+if echo "$PRUNE_ALL_OUTPUT" | grep -q "Total reclaimed space"; then
+    SPACE_ALL=$(echo "$PRUNE_ALL_OUTPUT" | grep "Total reclaimed space" | cut -d: -f2 | tr -d ' ')
+    echo "✓ Old unused images cleaned up: $SPACE_ALL reclaimed"
 else
     echo "✓ No old images to clean up"
 fi
