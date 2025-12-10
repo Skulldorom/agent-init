@@ -45,8 +45,6 @@ else
     echo "  Continuing with current version..."
 fi
 
-# Reuse temp directory if it still exists from the self-update check above
-
 echo ""
 echo "[1/5] Stopping Docker services..."
 cd "$PROJECT_DIR"
@@ -56,7 +54,8 @@ echo "✓ Docker services stopped"
 echo ""
 echo "[2/5] Downloading latest configuration files..."
 
-# Reuse temp directory if it still exists from the self-update check above
+# Note: TEMP_DIR needs to be recreated here because if self-update occurred above,
+# it was removed and this is a fresh process execution
 if [ ! -d "$TEMP_DIR" ] || [ -z "$TEMP_DIR" ]; then
     TEMP_DIR=$(mktemp -d)
     if ! curl -fsSL "${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz" | tar -xz -C "$TEMP_DIR" --strip-components=1; then
@@ -104,7 +103,7 @@ echo "[4/5] Cleaning up old Docker images..."
 # Remove dangling images (untagged images)
 PRUNE_OUTPUT=$(docker image prune -f 2>&1)
 if echo "$PRUNE_OUTPUT" | grep -q "Total reclaimed space"; then
-    SPACE=$(echo "$PRUNE_OUTPUT" | grep "Total reclaimed space" | cut -d: -f2 | tr -d ' ')
+    SPACE=$(echo "$PRUNE_OUTPUT" | awk -F': ' '/Total reclaimed space/ {print $2}')
     echo "✓ Dangling images removed: $SPACE reclaimed"
 else
     echo "✓ No dangling images to remove"
@@ -114,7 +113,7 @@ fi
 # Using -a to remove all unused images, not just dangling ones
 PRUNE_ALL_OUTPUT=$(docker image prune -a -f --filter "until=24h" 2>&1)
 if echo "$PRUNE_ALL_OUTPUT" | grep -q "Total reclaimed space"; then
-    SPACE_ALL=$(echo "$PRUNE_ALL_OUTPUT" | grep "Total reclaimed space" | cut -d: -f2 | tr -d ' ')
+    SPACE_ALL=$(echo "$PRUNE_ALL_OUTPUT" | awk -F': ' '/Total reclaimed space/ {print $2}')
     echo "✓ Old unused images cleaned up: $SPACE_ALL reclaimed"
 else
     echo "✓ No old images to clean up"
