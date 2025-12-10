@@ -18,20 +18,28 @@ REPO_URL="https://github.com/Skulldorom/agent-init"
 REPO_BRANCH="main"
 echo "checking env file...."
 
+# Check for .env file in current directory first
 if [ ! -f "$ENV_FILE" ]; then
-    echo ""
-    echo "✗ ERROR: .env file not found at $ENV_FILE"
-    echo ""
-    echo "Please create your .env file first with all required variables:"
-    echo "  nano $ENV_FILE"
-    echo ""
-    echo "Required variables:"
-    echo "  GITHUB_PAT=ghp_your_token_here"
-    echo "  GITHUB_USERNAME=your_username"
-    echo ""
-    echo "Add any other environment variables your app needs."
-    echo ""
-    exit 1
+    # If not found in current directory, check if it exists in the project directory
+    if [ -d "$PROJECT_DIR" ] && [ -f "$PROJECT_DIR/.env" ]; then
+        echo "✓ Found .env file in $PROJECT_DIR (from previous installation)"
+        echo "  Using existing .env file from project directory"
+        ENV_FILE="$PROJECT_DIR/.env"
+    else
+        echo ""
+        echo "✗ ERROR: .env file not found at $ENV_FILE"
+        echo ""
+        echo "Please create your .env file first with all required variables:"
+        echo "  nano $ENV_FILE"
+        echo ""
+        echo "Required variables:"
+        echo "  GITHUB_PAT=ghp_your_token_here"
+        echo "  GITHUB_USERNAME=your_username"
+        echo ""
+        echo "Add any other environment variables your app needs."
+        echo ""
+        exit 1
+    fi
 fi
 
 #create project directory
@@ -40,10 +48,20 @@ chmod 700 "$PROJECT_DIR"
 
 echo "Loading environment variables from $ENV_FILE..."
 
-#add automated secret_key and encryption key
-echo "SECRET_KEY=$(openssl rand -hex 32)" >> "$ENV_FILE"
-echo "ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$ENV_FILE"
-echo "✓ Keys added!"
+#add automated secret_key and encryption key if they don't exist
+if ! grep -q "^SECRET_KEY=" "$ENV_FILE"; then
+    echo "SECRET_KEY=$(openssl rand -hex 32)" >> "$ENV_FILE"
+    echo "✓ SECRET_KEY added!"
+else
+    echo "✓ SECRET_KEY already exists"
+fi
+
+if ! grep -q "^ENCRYPTION_KEY=" "$ENV_FILE"; then
+    echo "ENCRYPTION_KEY=$(openssl rand -base64 32)" >> "$ENV_FILE"
+    echo "✓ ENCRYPTION_KEY added!"
+else
+    echo "✓ ENCRYPTION_KEY already exists"
+fi
 
 # Load environment variables from .env
 set -a  # automatically export all variables
@@ -149,8 +167,10 @@ else
 fi
 
 echo "moving env to project directory.."
-#move env file to project directory
-mv "$ENV_FILE" "$PROJECT_DIR/"
+#move env file to project directory (if it's not already there)
+if [ "$ENV_FILE" != "$PROJECT_DIR/.env" ]; then
+    mv "$ENV_FILE" "$PROJECT_DIR/.env"
+fi
 cd "$PROJECT_DIR"
 
 # Start services
