@@ -33,14 +33,27 @@ if curl -fsSL "${REPO_URL}/archive/refs/heads/${REPO_BRANCH}.tar.gz" | tar -xz -
     echo "✓ Repository files downloaded"
     
     # Copy necessary files to project directory
-    cp "$TEMP_DIR/docker-compose.yml" "$PROJECT_DIR/"
-    cp "$TEMP_DIR/nginx.conf" "$PROJECT_DIR/"
+    if [ -f "$TEMP_DIR/docker-compose.yml" ]; then
+        cp "$TEMP_DIR/docker-compose.yml" "$PROJECT_DIR/"
+    else
+        echo "✗ Error: docker-compose.yml not found in repository"
+        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    
+    if [ -f "$TEMP_DIR/nginx.conf" ]; then
+        cp "$TEMP_DIR/nginx.conf" "$PROJECT_DIR/"
+    else
+        echo "✗ Error: nginx.conf not found in repository"
+        [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
+        exit 1
+    fi
     
     # Clean up temp directory
-    rm -rf "$TEMP_DIR"
+    [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
 else
     echo "✗ Error: Could not download repository from $REPO_URL"
-    rm -rf "$TEMP_DIR"
+    [ -n "$TEMP_DIR" ] && rm -rf "$TEMP_DIR"
     exit 1
 fi
 
