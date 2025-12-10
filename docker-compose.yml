@@ -9,7 +9,7 @@ services:
     depends_on:
       - app
     command: >
-      sh -c 'echo "{ \"api_url\":\"${API_URL:-http://localhost/api}\"}" 
+      sh -c 'echo "{ \"api_url\":\"${API_URL:-http://localhost}\"}" 
       > /usr/share/nginx/html/config/config.json 
       && nginx -g "daemon off;"'
   app:
