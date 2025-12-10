@@ -11,6 +11,7 @@ PROJECT_DIR="/opt/techtoday-agent"
 REPO_URL="https://github.com/Skulldorom/agent-init"
 REPO_BRANCH="main"
 UPDATE_SCRIPT_PATH="/usr/local/bin/update"
+IMAGE_CLEANUP_AGE="24h"  # How old unused images should be before cleanup
 
 # Check if project directory exists
 if [ ! -d "$PROJECT_DIR" ]; then
@@ -111,7 +112,7 @@ fi
 
 # Remove unused images that are not associated with any container
 # Using -a to remove all unused images, not just dangling ones
-PRUNE_ALL_OUTPUT=$(docker image prune -a -f --filter "until=24h" 2>&1)
+PRUNE_ALL_OUTPUT=$(docker image prune -a -f --filter "until=$IMAGE_CLEANUP_AGE" 2>&1)
 if echo "$PRUNE_ALL_OUTPUT" | grep -q "Total reclaimed space"; then
     SPACE_ALL=$(echo "$PRUNE_ALL_OUTPUT" | awk -F': ' '/Total reclaimed space/ {print $2}')
     echo "✓ Old unused images cleaned up: $SPACE_ALL reclaimed"
