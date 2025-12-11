@@ -29,8 +29,8 @@ services:
       - RATE_LIMIT_STORAGE=redis://redis:6379/0
       - REDIS_CACHE_URL=redis://redis:6379/1
       - MODE=production
-      - ALLOWED_ORIGINS=${FRONTEND_DOMAIN:-http://localhost:5173}
-      - FRONTEND_DOMAIN=${FRONTEND_DOMAIN:-http://localhost:5173}
+      - ALLOWED_ORIGINS=${DOMAIN_NAME:-http://localhost}
+      - FRONTEND_DOMAIN=${DOMAIN_NAME:-http://localhost}
       # upload
       - UPLOAD_FOLDER=uploads
       #qdrant
