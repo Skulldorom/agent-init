@@ -77,6 +77,14 @@ else
     echo "✓ POSTGRES_PASSWORD already exists"
 fi
 
+if ! grep -q "^DAILY_REPORT_SECRET=" "$ENV_FILE"; then
+    echo "DAILY_REPORT_SECRET=$(openssl rand -base64 32)" >> "$ENV_FILE"
+    echo "✓ DAILY_REPORT_SECRET added!"
+else
+    echo "✓ DAILY_REPORT_SECRET already exists"
+fi
+
+
 # Load environment variables from .env
 set -a  # automatically export all variables
 source "$ENV_FILE"
