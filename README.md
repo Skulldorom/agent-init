@@ -9,9 +9,6 @@ This will be moved into the `/opt/techtoday-agent`
 
 ```
 DOMAIN_NAME=http://localhost
-#postgresql 
-POSTGRES_USER=bob
-POSTGRES_PASSWORD=secret
 # Mail
 MAIL_USERNAME=
 MAIL_PASSWORD=
@@ -23,7 +20,6 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 # AI/LLM Configuration
 OPENAI_API_KEY=
-AI_NAME=Shani
 # Authentication & API Tokens
 ADMIN_EMAIL=
 DAILY_REPORT_SECRET=secret
