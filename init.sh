@@ -208,7 +208,7 @@ else
     echo "Failed to initialize backend"
     exit 1
 fi
-
+echo -e "Access your application: \033]8;;https://${DOMAIN}\033\\https://${DOMAIN}\033]8;;\033\\"
 # ====================================
 # Done
 # ====================================
@@ -217,7 +217,8 @@ echo "======================================"
 echo "✓ Setup Complete!"
 echo "======================================"
 echo ""
-echo "Your Docker services are running in: $PROJECT_DIR"
+echo -e "🌐 Your application is now live at:"
+echo -e "   \033]8;;${DOMAIN_NAME}\033\\\033[1;34m${DOMAIN_NAME}\033[0m\033]8;;\033\\"
 echo ""
 echo "Manage services with:"
 echo "   - docker compose ps      (view status)"
