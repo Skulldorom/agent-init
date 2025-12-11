@@ -22,7 +22,6 @@ GOOGLE_CLIENT_SECRET=
 OPENAI_API_KEY=
 # Authentication & API Tokens
 ADMIN_EMAIL=
-DAILY_REPORT_SECRET=secret
 # API key for currency information from data.fixer.io
 CURRENCY_API_KEY=
 PORTAL_API_TOKEN=
