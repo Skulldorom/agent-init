@@ -63,14 +63,14 @@ else
     echo "✓ ENCRYPTION_KEY already exists"
 fi
 if ! grep -q "^POSTGRES_USER=" "$ENV_FILE"; then
-    echo "POSTGRES_USER=\"$(openssl rand -hex 32)\"" >> "$ENV_FILE"
+    echo "POSTGRES_USER=\"$(openssl rand -hex 16)\"" >> "$ENV_FILE"
     echo "✓ POSTGRES_USER added!"
 else
     echo "✓ POSTGRES_USER already exists"
 fi
 
 if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE"; then
-    echo "POSTGRES_PASSWORD=\"$(openssl rand -hex 32)\"" >> "$ENV_FILE"
+    echo "POSTGRES_PASSWORD=\"$(openssl rand -hex 16)\"" >> "$ENV_FILE"
     echo "✓ POSTGRES_PASSWORD added!"
 else
     echo "✓ POSTGRES_PASSWORD already exists"
