@@ -84,6 +84,14 @@ else
 fi
 
 
+if ! grep -q "^ADMIN_PASSWORD=" "$ENV_FILE"; then
+    echo "ADMIN_PASSWORD=\"$(openssl rand -base64 16)\"" >> "$ENV_FILE"
+    echo "✓ ADMIN_PASSWORD added!"
+else
+    echo "✓ ADMIN_PASSWORD already exists"
+fi
+
+
 # Load environment variables from .env
 set -a  # automatically export all variables
 source "$ENV_FILE"
