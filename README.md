@@ -21,7 +21,7 @@ GOOGLE_CLIENT_SECRET=
 # AI/LLM Configuration
 OPENAI_API_KEY=
 # Authentication & API Tokens
-ADMIN_EMAIL=
+ADMIN_EMAIL=admin@admin.com
 # API key for currency information from data.fixer.io
 CURRENCY_API_KEY=
 PORTAL_API_TOKEN=
