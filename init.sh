@@ -70,7 +70,7 @@ else
 fi
 
 if ! grep -q "^POSTGRES_PASSWORD=" "$ENV_FILE"; then
-    echo "POSTGRES_PASSWORD=\"$(openssl rand -base64 32)\"" >> "$ENV_FILE"
+    echo "POSTGRES_PASSWORD=\"$(openssl rand -hex 32)\"" >> "$ENV_FILE"
     echo "✓ POSTGRES_PASSWORD added!"
 else
     echo "✓ POSTGRES_PASSWORD already exists"
