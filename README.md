@@ -1,5 +1,8 @@
 # agent-init
-
+## Minimum requirements
+  💾  Disk Size: 2 GB
+  🧠  CPU Cores: 1
+  🛠️  RAM Size: 512 MiB
 
 ## Getting Started
 
