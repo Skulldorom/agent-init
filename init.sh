@@ -83,13 +83,16 @@ else
     echo "✓ DAILY_REPORT_SECRET already exists"
 fi
 
-
 if ! grep -q "^ADMIN_PASSWORD=" "$ENV_FILE"; then
-    echo "ADMIN_PASSWORD=\"$(openssl rand -base64 16)\"" >> "$ENV_FILE"
+    ADMIN_PASSWORD="$(openssl rand -base64 16)"
+    echo "ADMIN_PASSWORD=\"$ADMIN_PASSWORD\"" >> "$ENV_FILE"
     echo "✓ ADMIN_PASSWORD added!"
 else
+    # Extract existing password from the file
+    ADMIN_PASSWORD=$(grep "^ADMIN_PASSWORD=" "$ENV_FILE" | cut -d'"' -f2)
     echo "✓ ADMIN_PASSWORD already exists"
 fi
+
 
 
 # Load environment variables from .env
@@ -216,7 +219,6 @@ else
     echo "Failed to initialize backend"
     exit 1
 fi
-echo -e "Access your application: \033]8;;https://${DOMAIN}\033\\https://${DOMAIN}\033]8;;\033\\"
 # ====================================
 # Done
 # ====================================
@@ -228,6 +230,7 @@ echo ""
 echo -e "🌐 Your application is now live at:"
 echo -e "   \033[1;34m${DOMAIN_NAME}\033[0m"
 echo ""
+echo -e "🌐 Your admin email is $ADMIN_EMAIL and password is $ADMIN_PASSWORD:"
 echo "Manage services with:"
 echo "   - docker compose ps      (view status)"
 echo "   - docker compose logs    (view logs)"
