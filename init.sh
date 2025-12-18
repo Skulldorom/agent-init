@@ -217,8 +217,7 @@ echo "Initializing db..."
 if curl --fail --retry 4 --retry-delay 2 --retry-connrefused --retry-all-errors -X POST "http://localhost/api/init"; then
     echo "Backend initialized"
 else
-    echo "Failed to initialize backend"
-    exit 1
+    echo "Failed to initialize backend, manual post request to  http://localhost/api/init required"
 fi
 # ====================================
 # Done
